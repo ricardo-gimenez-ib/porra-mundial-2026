@@ -252,6 +252,13 @@
     <div class="regla-row"><span>Horarios</span><span style="font-weight:700">Hora España (CEST)</span></div>
     <div class="regla-row"><span>🌙 = madrugada</span><span style="font-weight:700;color:var(--morado)">Poner despertador</span></div>
   </div>
+  <div class="regla-card">
+    <h3>🚪 ¿Te unes con el Mundial empezado?</h3>
+    <div class="regla-row"><span>Puedes rellenar la porra en cualquier momento</span><span class="pts-badge teal">OK</span></div>
+    <div class="regla-row"><span>Partidos ya empezados o jugados (🔒)</span><span class="pts-badge grey">0 pts</span></div>
+    <div class="regla-row"><span>Bonus (cerró el 11 jun a las 21:00)</span><span class="pts-badge grey">0 pts</span></div>
+    <div class="regla-row"><span>Todo lo que esté por jugarse</span><span class="pts-badge">Puntúa normal</span></div>
+  </div>
 </div>
 
 <div class="save-bar">
@@ -282,6 +289,7 @@
 ═══════════════════════════════════════════════════════════════════════════ */
 const RESULTS_URL = 'https://textdb.online/df2b39b8-7a19-47bc-88f9-04ac1ee6bdb6';
 let RES_GRUPOS = {}, KO_TEAMS = {}, KO_RESULT = {}, KO_SCORE = {}, RESULTS_UPDATED = null;
+let TIME_FLOOR = 0; // suelo de tiempo del servidor: impide trampas atrasando el reloj del móvil
 
 function applyResults(data){
   if(!data || typeof data !== 'object') return false;
@@ -290,6 +298,8 @@ function applyResults(data){
   KO_RESULT = data.ko_result || {};
   KO_SCORE = data.ko_score || {};
   RESULTS_UPDATED = data.updated || null;
+  const t = Date.parse(RESULTS_UPDATED);
+  if(!isNaN(t)) TIME_FLOOR = Math.max(TIME_FLOOR, t);
   return true;
 }
 async function syncResults(){
@@ -315,6 +325,7 @@ function rerenderAll(){
   cargarInputs();
   renderBracket();
   renderPuntos();
+  if(typeof enforceBonusDeadline === 'function') enforceBonusDeadline();
 }
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -502,7 +513,8 @@ function matchDate(f, h){
   const [hh, min] = h.replace('🌙','').trim().split(':').map(Number);
   return new Date(2026, mm-1, dd, hh, min);
 }
-function isLocked(f, h){ return Date.now() >= matchDate(f, h).getTime(); }
+function ahora(){ return Math.max(Date.now(), TIME_FLOOR); } // no se puede "viajar al pasado" cambiando el reloj
+function isLocked(f, h){ return ahora() >= matchDate(f, h).getTime(); }
 const BONUS_DEADLINE = new Date(2026, 5, 11, 21, 0); // 11 jun 21:00, partido inaugural
 
 /* ── Clasificación de grupos (de resultados reales o de la porra) ─────────── */
@@ -592,7 +604,7 @@ function renderGrupos(){
     ps.forEach(([p,i])=>{
       const real = realScore(i);
       const pts = puntosGrupo(i);
-      const locked = isLocked(p.f, p.h);
+      const locked = isLocked(p.f, p.h) || !!real; // con resultado publicado, siempre bloqueado
       let chip = '';
       if(real){
         const cls = pts===3?'ok3':pts===1?'ok1':'ko';
@@ -823,11 +835,13 @@ document.getElementById('nombreParticipante').addEventListener('input', autoSave
 document.querySelectorAll('.bonus-input').forEach(el=>el.addEventListener('input', autoSave));
 
 // Bonus se cierra al empezar el partido inaugural (11 jun 21:00)
-if(Date.now() >= BONUS_DEADLINE.getTime()){
+function enforceBonusDeadline(){
+  if(ahora() < BONUS_DEADLINE.getTime()) return;
   document.querySelectorAll('.bonus-input').forEach(el=>el.disabled = true);
   const hint = document.querySelector('#tab-bonus .bracket-hint');
-  if(hint) hint.innerHTML = '🔒 <strong>Bonus cerrado</strong> — el Mundial ya ha empezado. Las predicciones guardadas antes del inicio siguen contando.';
+  if(hint) hint.innerHTML = '🔒 <strong>Bonus cerrado</strong> — el Mundial ya ha empezado. Las predicciones guardadas antes del inicio siguen contando; si te unes ahora, el bonus puntúa 0.';
 }
+enforceBonusDeadline();
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 if(READONLY && SNAPSHOT){
@@ -837,7 +851,7 @@ if(READONLY && SNAPSHOT){
   const bn = document.createElement('div');
   bn.className = 'bracket-hint';
   bn.style.cssText = 'margin:12px 16px;max-width:720px;border-color:#5b21b6;background:#f5f3ff;color:#4c1d95';
-  bn.innerHTML = `🔒 Estás viendo la <strong>porra sellada de ${SNAPSHOT.nombre||'?'}</strong> · sellada el <strong>${fecha}</strong>${tarde?' ⚠️ (después del inicio del Mundial)':''}. No se puede modificar. <a href="#" onclick="location.hash=''; location.reload(); return false;" style="font-weight:700">Ir a mi porra →</a>`;
+  bn.innerHTML = `🔒 Estás viendo la <strong>porra sellada de ${SNAPSHOT.nombre||'?'}</strong> · sellada el <strong>${fecha}</strong>${tarde?' ⚠️ (con el Mundial ya empezado: los partidos anteriores al sellado puntúan 0)':''}. No se puede modificar. <a href="#" onclick="location.hash=''; location.reload(); return false;" style="font-weight:700">Ir a mi porra →</a>`;
   document.querySelector('.tabs').before(bn);
   // Ocultar botones de edición
   const botones = document.querySelector('.save-bar div');
