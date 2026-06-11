@@ -190,13 +190,8 @@
 <div id="tab-bonus" class="section">
   <div class="bonus-card">
     <h3>🏆 Campeón</h3>
-    <div class="pts">3 puntos si aciertas</div>
+    <div class="pts">4 puntos si aciertas</div>
     <input type="text" class="bonus-input" id="b-campeon" placeholder="País campeón…">
-  </div>
-  <div class="bonus-card">
-    <h3>🥈 Subcampeón</h3>
-    <div class="pts">2 puntos si aciertas (el que pierde la final)</div>
-    <input type="text" class="bonus-input" id="b-finalista" placeholder="País subcampeón…">
   </div>
   <div class="bonus-card">
     <h3>🎯 Finalistas (los 2 equipos de la final)</h3>
@@ -204,6 +199,14 @@
     <div class="bonus-row">
       <input type="text" class="bonus-input" id="b-semi1" placeholder="Finalista 1…">
       <input type="text" class="bonus-input" id="b-semi2" placeholder="Finalista 2…">
+    </div>
+  </div>
+  <div class="bonus-card">
+    <h3>🥉 Semifinalistas (los 2 eliminados en semifinales)</h3>
+    <div class="pts">2 puntos por cada equipo que aciertes</div>
+    <div class="bonus-row">
+      <input type="text" class="bonus-input" id="b-sf1" placeholder="Semifinalista 1…">
+      <input type="text" class="bonus-input" id="b-sf2" placeholder="Semifinalista 2…">
     </div>
   </div>
   <div class="bonus-card">
@@ -226,7 +229,7 @@
     <div class="pts">1 punto si aciertas (jugadores nacidos a partir de 2005)</div>
     <input type="text" class="bonus-input" id="b-joven" placeholder="Nombre del jugador…">
   </div>
-  <div class="bracket-hint">⚠️ <strong>Cerrar antes del 11 de junio a las 21:00h</strong> (partido inaugural)</div>
+  <div class="bracket-hint">⚠️ <strong>Cerrar antes del 18 de junio a las 23:59h</strong> — puedes unirte hasta entonces y optar al bonus</div>
 </div>
 
 <div id="tab-puntos" class="section"></div>
@@ -245,10 +248,10 @@
     <div class="regla-row"><span>Fallo</span><span class="pts-badge grey">0 pts</span></div>
   </div>
   <div class="regla-card">
-    <h3>⭐ Bonus — cerrar antes del 11 jun 21:00h</h3>
-    <div class="regla-row"><span>🏆 Campeón correcto</span><span class="pts-badge gold">3 pts</span></div>
-    <div class="regla-row"><span>🥈 Subcampeón correcto</span><span class="pts-badge gold">2 pts</span></div>
+    <h3>⭐ Bonus — cerrar antes del 18 jun 23:59h</h3>
+    <div class="regla-row"><span>🏆 Campeón correcto</span><span class="pts-badge gold">4 pts</span></div>
     <div class="regla-row"><span>🎯 Cada finalista correcto (2 equipos de la final)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>🥉 Cada semifinalista correcto (2 equipos)</span><span class="pts-badge gold">2 pts</span></div>
     <div class="regla-row"><span>⭐ Mejor jugador (Balón de Oro)</span><span class="pts-badge gold">1 pt</span></div>
     <div class="regla-row"><span>👟 Pichichi (Bota de Oro)</span><span class="pts-badge gold">1 pt</span></div>
     <div class="regla-row"><span>🧤 Mejor portero (Guante de Oro)</span><span class="pts-badge gold">1 pt</span></div>
@@ -265,7 +268,7 @@
     <h3>🚪 ¿Te unes con el Mundial empezado?</h3>
     <div class="regla-row"><span>Puedes rellenar la porra en cualquier momento</span><span class="pts-badge teal">OK</span></div>
     <div class="regla-row"><span>Partidos ya empezados o jugados (🔒)</span><span class="pts-badge grey">0 pts</span></div>
-    <div class="regla-row"><span>Bonus (cerró el 11 jun a las 21:00)</span><span class="pts-badge grey">0 pts</span></div>
+    <div class="regla-row"><span>Bonus (se cierra el 18 jun a las 23:59)</span><span class="pts-badge grey">0 pts</span></div>
     <div class="regla-row"><span>Todo lo que esté por jugarse</span><span class="pts-badge">Puntúa normal</span></div>
   </div>
 </div>
@@ -526,7 +529,7 @@ function matchDate(f, h){
 }
 function ahora(){ return Math.max(Date.now(), TIME_FLOOR); } // no se puede "viajar al pasado" cambiando el reloj
 function isLocked(f, h){ return ahora() >= matchDate(f, h).getTime(); }
-const BONUS_DEADLINE = new Date(2026, 5, 11, 21, 0); // 11 jun 21:00, partido inaugural
+const BONUS_DEADLINE = new Date(2026, 5, 18, 23, 59); // 18 jun 23:59
 
 /* ── Clasificación de grupos (de resultados reales o de la porra) ─────────── */
 function standings(getScore){
@@ -780,7 +783,7 @@ function setX12(i, val){
 }
 function recoger(){
   const d = { nombre: document.getElementById('nombreParticipante').value, x12: {...picks1x2}, picks, bonus:{} };
-  ['campeon','finalista','semi1','semi2','balon','pichichi','guante','joven'].forEach(k=>{ d.bonus[k]=document.getElementById('b-'+k).value; });
+  ['campeon','semi1','semi2','sf1','sf2','balon','pichichi','guante','joven'].forEach(k=>{ d.bonus[k]=document.getElementById('b-'+k).value; });
   return d;
 }
 function guardar(){
@@ -848,7 +851,7 @@ function cargarInputs(){
   const d = datosActivos();
   if(!d) return;
   picks1x2 = d.x12 ? {...d.x12} : {};
-  if(d.bonus) ['campeon','finalista','semi1','semi2','balon','pichichi','guante','joven'].forEach(k=>{ const el=document.getElementById('b-'+k); if(el&&d.bonus[k]) el.value=d.bonus[k]; });
+  if(d.bonus) ['campeon','semi1','semi2','sf1','sf2','balon','pichichi','guante','joven'].forEach(k=>{ const el=document.getElementById('b-'+k); if(el&&d.bonus[k]) el.value=d.bonus[k]; });
   if(READONLY) document.querySelectorAll('.bonus-input').forEach(el=>el.disabled = true);
 }
 function cargar(){
@@ -870,7 +873,7 @@ function enforceBonusDeadline(){
   if(ahora() < BONUS_DEADLINE.getTime()) return;
   document.querySelectorAll('.bonus-input').forEach(el=>el.disabled = true);
   const hint = document.querySelector('#tab-bonus .bracket-hint');
-  if(hint) hint.innerHTML = '🔒 <strong>Bonus cerrado</strong> — el Mundial ya ha empezado. Las predicciones guardadas antes del inicio siguen contando; si te unes ahora, el bonus puntúa 0.';
+  if(hint) hint.innerHTML = '🔒 <strong>Bonus cerrado</strong> — el plazo terminó el 18 de junio. Las predicciones guardadas antes siguen contando; si te unes ahora, el bonus puntúa 0.';
 }
 enforceBonusDeadline();
 
