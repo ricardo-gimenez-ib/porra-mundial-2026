@@ -186,7 +186,7 @@
   </div>
   <div class="bonus-card">
     <h3>🎯 Finalistas (los 2 equipos de la final)</h3>
-    <div class="pts">2 puntos por cada equipo que aciertes que llega a la final</div>
+    <div class="pts">3 puntos por cada equipo que aciertes que llega a la final</div>
     <div class="bonus-row">
       <select class="bonus-input" id="b-semi1"></select>
       <select class="bonus-input" id="b-semi2"></select>
@@ -201,23 +201,37 @@
     </div>
   </div>
   <div class="bonus-card">
+    <h3>🏟️ Cuartofinalistas (los 8 que llegan a cuartos)</h3>
+    <div class="pts">2 puntos por cada equipo que aciertes</div>
+    <div class="bonus-row">
+      <select class="bonus-input" id="b-qf1"></select>
+      <select class="bonus-input" id="b-qf2"></select>
+      <select class="bonus-input" id="b-qf3"></select>
+      <select class="bonus-input" id="b-qf4"></select>
+      <select class="bonus-input" id="b-qf5"></select>
+      <select class="bonus-input" id="b-qf6"></select>
+      <select class="bonus-input" id="b-qf7"></select>
+      <select class="bonus-input" id="b-qf8"></select>
+    </div>
+  </div>
+  <div class="bonus-card">
     <h3>⭐ Mejor jugador (Balón de Oro)</h3>
-    <div class="pts">1 punto si aciertas</div>
+    <div class="pts">2 puntos si aciertas</div>
     <input type="text" class="bonus-input" id="b-balon" list="dl-estrellas" placeholder="Elige o escribe un jugador…">
   </div>
   <div class="bonus-card">
     <h3>👟 Pichichi (Bota de Oro)</h3>
-    <div class="pts">1 punto si aciertas el máximo goleador</div>
+    <div class="pts">2 puntos si aciertas el máximo goleador</div>
     <input type="text" class="bonus-input" id="b-pichichi" list="dl-estrellas" placeholder="Elige o escribe un jugador…">
   </div>
   <div class="bonus-card">
     <h3>🧤 Mejor portero (Guante de Oro)</h3>
-    <div class="pts">1 punto si aciertas</div>
+    <div class="pts">2 puntos si aciertas</div>
     <input type="text" class="bonus-input" id="b-guante" list="dl-porteros" placeholder="Elige o escribe un portero…">
   </div>
   <div class="bonus-card">
     <h3>🌱 Mejor jugador joven</h3>
-    <div class="pts">1 punto si aciertas (jugadores nacidos a partir de 2005)</div>
+    <div class="pts">2 puntos si aciertas (jugadores nacidos a partir de 2005)</div>
     <input type="text" class="bonus-input" id="b-joven" list="dl-jovenes" placeholder="Elige o escribe un jugador…">
   </div>
   <datalist id="dl-estrellas"></datalist>
@@ -238,18 +252,19 @@
   </div>
   <div class="regla-card">
     <h3>🔥 Eliminatorias (toca al que pasa en el árbol)</h3>
-    <div class="regla-row"><span>Equipo que pasa correcto</span><span class="pts-badge">2 pts</span></div>
+    <div class="regla-row"><span>Equipo que pasa correcto</span><span class="pts-badge">1 pt</span></div>
     <div class="regla-row"><span>Fallo</span><span class="pts-badge grey">0 pts</span></div>
   </div>
   <div class="regla-card">
     <h3>⭐ Bonus — cerrar antes del 18 jun 23:59h</h3>
     <div class="regla-row"><span>🏆 Campeón correcto</span><span class="pts-badge gold">4 pts</span></div>
-    <div class="regla-row"><span>🎯 Cada finalista correcto (2 equipos de la final)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>🎯 Cada finalista correcto (2 equipos de la final)</span><span class="pts-badge gold">3 pts</span></div>
     <div class="regla-row"><span>🥉 Cada semifinalista correcto (2 equipos)</span><span class="pts-badge gold">2 pts</span></div>
-    <div class="regla-row"><span>⭐ Mejor jugador (Balón de Oro)</span><span class="pts-badge gold">1 pt</span></div>
-    <div class="regla-row"><span>👟 Pichichi (Bota de Oro)</span><span class="pts-badge gold">1 pt</span></div>
-    <div class="regla-row"><span>🧤 Mejor portero (Guante de Oro)</span><span class="pts-badge gold">1 pt</span></div>
-    <div class="regla-row"><span>🌱 Mejor jugador joven</span><span class="pts-badge gold">1 pt</span></div>
+    <div class="regla-row"><span>🏟️ Cada cuartofinalista correcto (8 equipos)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>⭐ Mejor jugador (Balón de Oro)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>👟 Pichichi (Bota de Oro)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>🧤 Mejor portero (Guante de Oro)</span><span class="pts-badge gold">2 pts</span></div>
+    <div class="regla-row"><span>🌱 Mejor jugador joven</span><span class="pts-badge gold">2 pts</span></div>
   </div>
   <div class="regla-card">
     <h3>ℹ️ Formato</h3>
@@ -744,7 +759,7 @@ function renderPuntos(){
   let pk = 0, ka = 0, kf = 0;
   Object.keys(KO_RESULT).forEach(id=>{
     if(!picks[id]) return;
-    if(picks[id]===KO_RESULT[id]){ pk += 2; ka++; } else kf++;
+    if(picks[id]===KO_RESULT[id]){ pk += 1; ka++; } else kf++;
   });
   const total = pg + pk;
   c.innerHTML = `
@@ -791,7 +806,7 @@ function onGroupInput(){ renderBracket(); autoSave(); }
 function recoger(){
   const d = { nombre: document.getElementById('nombreParticipante').value, inputs:{}, picks, bonus:{} };
   document.querySelectorAll('.gol-input').forEach(inp=>{ if(inp.value!=='') d.inputs[inp.id]=inp.value; });
-  ['campeon','semi1','semi2','sf1','sf2','balon','pichichi','guante','joven'].forEach(k=>{ d.bonus[k]=document.getElementById('b-'+k).value; });
+  ['campeon','semi1','semi2','sf1','sf2','qf1','qf2','qf3','qf4','qf5','qf6','qf7','qf8','balon','pichichi','guante','joven'].forEach(k=>{ d.bonus[k]=document.getElementById('b-'+k).value; });
   return d;
 }
 function guardar(){
@@ -858,7 +873,7 @@ function cargarInputs(){
   const d = datosActivos();
   if(!d) return;
   if(d.inputs) Object.entries(d.inputs).forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.value=v; });
-  if(d.bonus) ['campeon','semi1','semi2','sf1','sf2','balon','pichichi','guante','joven'].forEach(k=>{ const el=document.getElementById('b-'+k); if(el&&d.bonus[k]) el.value=d.bonus[k]; });
+  if(d.bonus) ['campeon','semi1','semi2','sf1','sf2','qf1','qf2','qf3','qf4','qf5','qf6','qf7','qf8','balon','pichichi','guante','joven'].forEach(k=>{ const el=document.getElementById('b-'+k); if(el&&d.bonus[k]) el.value=d.bonus[k]; });
   if(READONLY) document.querySelectorAll('.gol-input,.bonus-input').forEach(el=>el.disabled = true);
 }
 function cargar(){
@@ -881,7 +896,7 @@ const PORTEROS = ['Thibaut Courtois (Bélgica)','Alisson (Brasil)','Mike Maignan
 const JOVENES = ['Lamine Yamal (España)','Pau Cubarsí (España)','Endrick (Brasil)','Estêvão (Brasil)','Arda Güler (Turquía)','Warren Zaïre-Emery (Francia)','Kobbie Mainoo (Inglaterra)','Mathys Tel (Francia)'];
 function poblarBonus(){
   const opts = '<option value="">— Elegir selección —</option>' + Object.entries(GRUPOS).map(([g,info])=>`<optgroup label="Grupo ${g}">`+info.eq.map(e=>`<option value="${e}">${e}</option>`).join('')+'</optgroup>').join('');
-  ['b-campeon','b-semi1','b-semi2','b-sf1','b-sf2'].forEach(id=>{ const s=document.getElementById(id); if(s) s.innerHTML=opts; });
+  ['b-campeon','b-semi1','b-semi2','b-sf1','b-sf2','b-qf1','b-qf2','b-qf3','b-qf4','b-qf5','b-qf6','b-qf7','b-qf8'].forEach(id=>{ const s=document.getElementById(id); if(s) s.innerHTML=opts; });
   const fill=(id,arr)=>{ const dl=document.getElementById(id); if(dl) dl.innerHTML=arr.map(n=>`<option value="${n}">`).join(''); };
   fill('dl-estrellas',ESTRELLAS); fill('dl-porteros',PORTEROS); fill('dl-jovenes',JOVENES);
 }
