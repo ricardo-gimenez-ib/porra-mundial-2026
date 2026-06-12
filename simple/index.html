@@ -191,44 +191,47 @@
   <div class="bonus-card">
     <h3>🏆 Campeón</h3>
     <div class="pts">4 puntos si aciertas</div>
-    <input type="text" class="bonus-input" id="b-campeon" placeholder="País campeón…">
+    <select class="bonus-input" id="b-campeon"></select>
   </div>
   <div class="bonus-card">
     <h3>🎯 Finalistas (los 2 equipos de la final)</h3>
     <div class="pts">2 puntos por cada equipo que aciertes que llega a la final</div>
     <div class="bonus-row">
-      <input type="text" class="bonus-input" id="b-semi1" placeholder="Finalista 1…">
-      <input type="text" class="bonus-input" id="b-semi2" placeholder="Finalista 2…">
+      <select class="bonus-input" id="b-semi1"></select>
+      <select class="bonus-input" id="b-semi2"></select>
     </div>
   </div>
   <div class="bonus-card">
     <h3>🥉 Semifinalistas (los 2 eliminados en semifinales)</h3>
     <div class="pts">2 puntos por cada equipo que aciertes</div>
     <div class="bonus-row">
-      <input type="text" class="bonus-input" id="b-sf1" placeholder="Semifinalista 1…">
-      <input type="text" class="bonus-input" id="b-sf2" placeholder="Semifinalista 2…">
+      <select class="bonus-input" id="b-sf1"></select>
+      <select class="bonus-input" id="b-sf2"></select>
     </div>
   </div>
   <div class="bonus-card">
     <h3>⭐ Mejor jugador (Balón de Oro)</h3>
     <div class="pts">1 punto si aciertas</div>
-    <input type="text" class="bonus-input" id="b-balon" placeholder="Nombre del jugador…">
+    <input type="text" class="bonus-input" id="b-balon" list="dl-estrellas" placeholder="Elige o escribe un jugador…">
   </div>
   <div class="bonus-card">
     <h3>👟 Pichichi (Bota de Oro)</h3>
     <div class="pts">1 punto si aciertas el máximo goleador</div>
-    <input type="text" class="bonus-input" id="b-pichichi" placeholder="Nombre del jugador…">
+    <input type="text" class="bonus-input" id="b-pichichi" list="dl-estrellas" placeholder="Elige o escribe un jugador…">
   </div>
   <div class="bonus-card">
     <h3>🧤 Mejor portero (Guante de Oro)</h3>
     <div class="pts">1 punto si aciertas</div>
-    <input type="text" class="bonus-input" id="b-guante" placeholder="Nombre del portero…">
+    <input type="text" class="bonus-input" id="b-guante" list="dl-porteros" placeholder="Elige o escribe un portero…">
   </div>
   <div class="bonus-card">
     <h3>🌱 Mejor jugador joven</h3>
     <div class="pts">1 punto si aciertas (jugadores nacidos a partir de 2005)</div>
-    <input type="text" class="bonus-input" id="b-joven" placeholder="Nombre del jugador…">
+    <input type="text" class="bonus-input" id="b-joven" list="dl-jovenes" placeholder="Elige o escribe un jugador…">
   </div>
+  <datalist id="dl-estrellas"></datalist>
+  <datalist id="dl-porteros"></datalist>
+  <datalist id="dl-jovenes"></datalist>
   <div class="bracket-hint">⚠️ <strong>Cerrar antes del 18 de junio a las 23:59h</strong> — puedes unirte hasta entonces y optar al bonus</div>
 </div>
 
@@ -664,7 +667,7 @@ function renderGrupos(){
 /* ── Render árbol eliminatorias ───────────────────────────────────────────── */
 function renderBracket(){
   ST_REAL = standings(realScore);
-  ST_PRED = standings(predScore);
+  ST_PRED = standings(i => realScore(i) || predScore(i)); // usa el resultado real en partidos ya jugados y tu pronóstico en el resto
   const wrap = document.getElementById('bracket');
   wrap.innerHTML = '';
   ROUNDS.forEach((round)=>{
@@ -866,7 +869,18 @@ function cargar(){
   } else if(d.nombre) document.getElementById('save-status').textContent = '✅ Datos cargados · '+d.nombre;
 }
 document.getElementById('nombreParticipante').addEventListener('input', autoSave);
-document.querySelectorAll('.bonus-input').forEach(el=>el.addEventListener('input', autoSave));
+document.querySelectorAll('.bonus-input').forEach(el=>{ el.addEventListener('input', autoSave); el.addEventListener('change', autoSave); });
+
+// ── Poblar desplegables del bonus ─────────────────────────────────────────────
+const ESTRELLAS = ['Kylian Mbappé (Francia)','Lionel Messi (Argentina)','Lautaro Martínez (Argentina)','Julián Álvarez (Argentina)','Vinícius Jr (Brasil)','Rodrygo (Brasil)','Raphinha (Brasil)','Jude Bellingham (Inglaterra)','Harry Kane (Inglaterra)','Bukayo Saka (Inglaterra)','Phil Foden (Inglaterra)','Lamine Yamal (España)','Pedri (España)','Rodri (España)','Nico Williams (España)','Cristiano Ronaldo (Portugal)','Bruno Fernandes (Portugal)','Rafael Leão (Portugal)','Kevin De Bruyne (Bélgica)','Romelu Lukaku (Bélgica)','Erling Haaland (Noruega)','Martin Ødegaard (Noruega)','Virgil van Dijk (Países Bajos)','Cody Gakpo (Países Bajos)','Jamal Musiala (Alemania)','Florian Wirtz (Alemania)','Federico Valverde (Uruguay)','Darwin Núñez (Uruguay)','Luka Modrić (Croacia)','Achraf Hakimi (Marruecos)','Son Heung-min (Corea del Sur)','Luis Díaz (Colombia)','Christian Pulisic (USA)','Takefusa Kubo (Japón)','Alexander Isak (Suecia)','Viktor Gyökeres (Suecia)'];
+const PORTEROS = ['Thibaut Courtois (Bélgica)','Alisson (Brasil)','Mike Maignan (Francia)','Unai Simón (España)','Emiliano Martínez (Argentina)','Jordan Pickford (Inglaterra)','Yann Sommer (Suiza)','Yassine Bounou (Marruecos)','Marc-André ter Stegen (Alemania)','Diogo Costa (Portugal)'];
+const JOVENES = ['Lamine Yamal (España)','Pau Cubarsí (España)','Endrick (Brasil)','Estêvão (Brasil)','Arda Güler (Turquía)','Warren Zaïre-Emery (Francia)','Kobbie Mainoo (Inglaterra)','Mathys Tel (Francia)'];
+function poblarBonus(){
+  const opts = '<option value="">— Elegir selección —</option>' + Object.entries(GRUPOS).map(([g,info])=>`<optgroup label="Grupo ${g}">`+info.eq.map(e=>`<option value="${e}">${e}</option>`).join('')+'</optgroup>').join('');
+  ['b-campeon','b-semi1','b-semi2','b-sf1','b-sf2'].forEach(id=>{ const s=document.getElementById(id); if(s) s.innerHTML=opts; });
+  const fill=(id,arr)=>{ const dl=document.getElementById(id); if(dl) dl.innerHTML=arr.map(n=>`<option value="${n}">`).join(''); };
+  fill('dl-estrellas',ESTRELLAS); fill('dl-porteros',PORTEROS); fill('dl-jovenes',JOVENES);
+}
 
 // Bonus se cierra al empezar el partido inaugural (11 jun 21:00)
 function enforceBonusDeadline(){
@@ -892,6 +906,7 @@ if(READONLY && SNAPSHOT){
   if(botones) botones.style.display = 'none';
   document.getElementById('save-status').textContent = '🔒 Porra sellada · solo lectura';
 }
+poblarBonus();     // rellena los desplegables del bonus antes de cargar valores guardados
 cargar();          // carga nombre + picks + picks1x2 (vía cargarInputs)
 renderGrupos();    // pinta los grupos ya con las selecciones 1/X/2
 renderEquipos();
