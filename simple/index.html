@@ -534,6 +534,9 @@ function ahora(){ return Math.max(Date.now(), TIME_FLOOR); } // no se puede "via
 function isLocked(f, h){ return ahora() >= matchDate(f, h).getTime(); }
 const BONUS_DEADLINE = new Date(2026, 5, 18, 23, 59); // 18 jun 23:59
 
+/* ── Desempate estable pseudoaleatorio (mismo resultado en cada render) ───── */
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0); }
+
 /* ── Clasificación de grupos (de resultados reales o de la porra) ─────────── */
 function standings(getScore){
   const tab = {};
@@ -550,10 +553,36 @@ function standings(getScore){
   const out = {};
   Object.keys(tab).forEach(g=>{
     const orden = Object.entries(tab[g].t)
-      .sort((x,y)=> y[1].p-x[1].p || y[1].gd-x[1].gd || y[1].gf-x[1].gf || x[0].localeCompare(y[0]))
+      .sort((x,y)=> y[1].p-x[1].p || y[1].gd-x[1].gd || y[1].gf-x[1].gf || (hashStr(g+x[0])-hashStr(g+y[0])))
       .map(e=>e[0]);
-    out[g] = { complete: tab[g].complete, orden };
+    out[g] = { complete: tab[g].complete, orden, stats: tab[g].t };
   });
+  return out;
+}
+
+/* ── Asignación de los 8 mejores terceros a los huecos del cuadro ─────────── */
+const THIRD_SLOTS = {p74:'ABCDF', p77:'CDFGH', p79:'CEFHI', p80:'EHIJK', p81:'BEFIJ', p82:'AEHIJ', p85:'EFGIJ', p87:'DEIJL'};
+function matchSlots(slotIds, groups){
+  if(slotIds.length===0) return {};
+  const [s,...rest]=slotIds;
+  for(const g of groups){
+    if(THIRD_SLOTS[s].includes(g)){
+      const sub = matchSlots(rest, groups.filter(x=>x!==g));
+      if(sub){ sub[s]=g; return sub; }
+    }
+  }
+  return null;
+}
+function thirdsAssignment(st){
+  const gs = Object.keys(GRUPOS);
+  if(!gs.every(g=>st[g] && st[g].complete)) return null;
+  const thirds = gs.map(g=>{ const name=st[g].orden[2], s=st[g].stats[name]; return {g, name, p:s.p, gd:s.gd, gf:s.gf}; });
+  thirds.sort((x,y)=> y.p-x.p || y.gd-x.gd || y.gf-x.gf || (hashStr(x.name)-hashStr(y.name)));
+  const best8 = thirds.slice(0,8).map(t=>t.g).sort();   // los 8 mejores terceros
+  const assign = matchSlots(Object.keys(THIRD_SLOTS), best8);
+  if(!assign) return null;
+  const out = {};
+  Object.keys(THIRD_SLOTS).forEach(s=>{ out[s] = st[assign[s]].orden[2]; });
   return out;
 }
 function realScore(i){ const m = PG[i]; return RES_GRUPOS[m.local+'|'+m.vis] || RES_GRUPOS[i] || null; }
@@ -577,7 +606,11 @@ function resolveMatch(id){
       if(sP && sP.complete) return {name:sP.orden[rank-1], status:'pred'};
       return {name:null, label:`${rank}º Grupo ${g}`};
     }
-    if(code.startsWith('T:')) return {name:null, label:code.slice(2)+' (por definir)'};
+    if(code.startsWith('T:')){
+      if(THIRDS_REAL && THIRDS_REAL[id]) return {name:THIRDS_REAL[id], status:'real'};
+      if(THIRDS_PRED && THIRDS_PRED[id]) return {name:THIRDS_PRED[id], status:'pred'};
+      return {name:null, label:code.slice(2)+' (al completar grupos)'};
+    }
     const ref = code.slice(2);
     const refTeams = resolveMatch(ref);
     let winner = null, status = null;
@@ -596,7 +629,7 @@ function resolveMatch(id){
   return teams;
 }
 
-let ST_REAL = {}, ST_PRED = {};
+let ST_REAL = {}, ST_PRED = {}, THIRDS_REAL = null, THIRDS_PRED = null;
 
 /* ── Render fase de grupos ────────────────────────────────────────────────── */
 function horaBadge(h){
@@ -668,6 +701,8 @@ function renderGrupos(){
 function renderBracket(){
   ST_REAL = standings(realScore);
   ST_PRED = standings(i => realScore(i) || predScore(i)); // usa el resultado real en partidos ya jugados y tu pronóstico en el resto
+  THIRDS_REAL = thirdsAssignment(ST_REAL);
+  THIRDS_PRED = thirdsAssignment(ST_PRED);
   const wrap = document.getElementById('bracket');
   wrap.innerHTML = '';
   ROUNDS.forEach((round)=>{
