@@ -380,7 +380,7 @@ const EMOJI = {
 function flagHTML(name){
   const code = ISO[name];
   if(!code) return '<span class="flag-fallback" style="display:inline">🏳️</span>';
-  return `<img class="flagimg" src="https://flagcdn.com/h24/${code}.png" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="flag-fallback">${EMOJI[name]||'🏳️'}</span>`;
+  return `<img class="flagimg" src="https://flagcdn.com/h24/${code}.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="flag-fallback">${EMOJI[name]||'🏳️'}</span>`;
 }
 
 const GRUPOS = {
@@ -732,7 +732,7 @@ function renderBracket(){
       const myPick = picks[id] && teams.some(t=>t.name===picks[id]) ? picks[id] : null;
       const decidido = !!myPick && !realWinner;
       let acierto = '';
-      if(realWinner && myPick) acierto = myPick===realWinner ? '<span class="acierto-ko si">✓ +2</span>' : '<span class="acierto-ko no">✗ 0</span>';
+      if(realWinner && myPick) acierto = myPick===realWinner ? '<span class="acierto-ko si">✓ +1</span>' : '<span class="acierto-ko no">✗ 0</span>';
       else if(locked && !realWinner) acierto = '<span class="acierto-ko" style="background:#6b7280">🔒</span>';
       const scores = (KO_SCORE[id]||'').split('-');
       html += `<div class="ko-match ${decidido?'decidido':''} ${m.final?'la-final':''}">
