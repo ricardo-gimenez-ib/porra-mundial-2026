@@ -734,7 +734,9 @@ function renderBracket(){
       let acierto = '';
       if(realWinner && myPick) acierto = myPick===realWinner ? '<span class="acierto-ko si">✓ +1</span>' : '<span class="acierto-ko no">✗ 0</span>';
       else if(locked && !realWinner) acierto = '<span class="acierto-ko" style="background:#6b7280">🔒</span>';
-      const scores = (KO_SCORE[id]||'').split('-');
+      const koScoreRaw = KO_SCORE[id]||'';
+      const scores = koScoreRaw.split('(')[0].trim().split('-');
+      const scoreExtra = (koScoreRaw.match(/\(([^)]*)\)/)||[])[1] || '';
       html += `<div class="ko-match ${decidido?'decidido':''} ${m.final?'la-final':''}">
         <div class="ko-head ${m.final?'gold':''}">${horaBadge(m.h)}<span class="ko-label">${m.f} · ${KO_LABEL[id]}</span>${acierto}</div>`;
       teams.forEach((t,slot)=>{
@@ -750,7 +752,7 @@ function renderBracket(){
         const tag = t.status==='pred' ? '<span class="pred-tag">tu porra</span>' : '';
         html += `<div class="${cls}" onclick="pick('${id}','${t.name.replace(/'/g,"\\'")}')">${flagHTML(t.name)}<span class="nombre-eq">${t.name}</span>${tag}${sc}</div>`;
       });
-      html += `<div class="ko-foot">📍 ${m.sede}</div></div>`;
+      html += `<div class="ko-foot">📍 ${m.sede}${scoreExtra?` · <b>${scoreExtra}</b>`:''}</div></div>`;
     });
     html += '</div>';
     col.innerHTML = html;
