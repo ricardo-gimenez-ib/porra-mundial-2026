@@ -732,7 +732,7 @@ function renderBracket(){
       const myPick = picks[id] && teams.some(t=>t.name===picks[id]) ? picks[id] : null;
       const decidido = !!myPick && !realWinner;
       let acierto = '';
-      if(realWinner && myPick) acierto = myPick===realWinner ? '<span class="acierto-ko si">✓ +1</span>' : '<span class="acierto-ko no">✗ 0</span>';
+      if(realWinner && picks[id]) acierto = picks[id]===realWinner ? `<span class="acierto-ko si" title="Tu pronóstico: ${picks[id]}">✓ +1</span>` : `<span class="acierto-ko no" title="Tu pronóstico: ${picks[id]}">✗ 0</span>`;
       else if(locked && !realWinner) acierto = '<span class="acierto-ko" style="background:#6b7280">🔒</span>';
       const koScoreRaw = KO_SCORE[id]||'';
       const scores = koScoreRaw.split('(')[0].trim().split('-');
